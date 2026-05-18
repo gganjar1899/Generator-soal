@@ -249,7 +249,7 @@ table.kisi tr:hover td{background:var(--coral-pale)}
   <div class="sidebar-section">
     <div class="section-label">Mode Generator</div>
     <div class="notice">
-      <strong>Mode Hybrid Server:</strong> Mode utama memakai Gemini dari server, sehingga guru tidak perlu memasukkan API key. Jika server belum dipasang, gunakan Offline Template.
+      <strong>Mode Hybrid:</strong> Gemini/Claude digunakan jika API key tersedia. Jika kosong, aplikasi otomatis memakai Offline Template.
     </div>
     <div class="form-group">
       <label>Pilih Mode</label>
@@ -261,9 +261,9 @@ table.kisi tr:hover td{background:var(--coral-pale)}
       </select>
     </div>
     <div class="form-group">
-      <label>API Key Pribadi Gemini/Claude (Opsional)</label>
+      <label>API Key Gemini/Claude (Opsional)</label>
       <div class="apikey-wrap">
-        <input type="password" id="apiKey" placeholder="Kosongkan jika memakai Server Gemini" oninput="checkApiKey()" autocomplete="off">
+        <input type="password" id="apiKey" placeholder="Gemini: AIza... / Claude: sk-ant-..." oninput="checkApiKey()" autocomplete="off">
         <button class="apikey-toggle" onclick="toggleApiKeyVis()" title="Tampilkan/sembunyikan">Lihat</button>
       </div>
       <div class="apikey-status" id="apiKeyStatus"></div>
@@ -321,19 +321,15 @@ table.kisi tr:hover td{background:var(--coral-pale)}
       <div class="form-group">
         <label>Jenis Asesmen</label>
         <select id="jenisAsesmen" onchange="onAsesmenChange()">
-          <optgroup label="-- Asesmen Madrasah --">
-            <option value="ASAT">ASAT - Asesmen Sumatif Akhir Tahun</option>
-            <option value="ASAJ">ASAJ - Asesmen Sumatif Akhir Jenjang</option>
-            <option value="ASAN">ASAN - Asesmen Sumatif Akhir Nishfu (Tengah Semester)</option>
-          </optgroup>
-          <optgroup label="-- Kurikulum Merdeka --">
-            <option value="Sumatif Akhir Semester" selected>Sumatif Akhir Semester</option>
-            <option value="Sumatif Tengah Semester">Sumatif Tengah Semester</option>
-            <option value="Sumatif Harian">Sumatif Harian</option>
-            <option value="Formatif">Formatif</option>
-            <option value="Remedial">Remedial</option>
-            <option value="Pengayaan">Pengayaan</option>
-          </optgroup>
+          <option value="Formatif">Formatif</option>
+          <option value="Sumatif Harian">Sumatif Harian</option>
+          <option value="Sumatif Tengah Semester">Sumatif Tengah Semester</option>
+          <option value="Sumatif Akhir Semester" selected>Sumatif Akhir Semester</option>
+          <option value="ASAN">ASAN - Asesmen Sumatif Tengah Semester</option>
+          <option value="ASAT">ASAT - Asesmen Sumatif Akhir Tahun</option>
+          <option value="ASAJ">ASAJ - Asesmen Sumatif Akhir Jenjang</option>
+          <option value="Remedial">Remedial</option>
+          <option value="Pengayaan">Pengayaan</option>
         </select>
       </div>
     </div>
@@ -399,10 +395,14 @@ table.kisi tr:hover td{background:var(--coral-pale)}
     <div class="form-group">
       <label>Topik / Materi Pokok *</label>
       <textarea id="topik">Dunia Digital dan Informasi: Ruang Digital, Mesin Pencari, Konten Digital, Etika Digital, Kualitas Informasi</textarea>
+
+      <div style="font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5">
+        Tips: untuk soal HOTS, tulis topik secara spesifik, misalnya "Analisis risiko keamanan akun dan solusi perlindungan data pribadi siswa SMP".
+      </div>
     </div>
     <div class="form-group">
-      <label>Referensi Guru (TXT, opsional)</label>
-      <input type="file" id="refFile" accept=".txt" style="padding:6px 10px;font-size:11px" onchange="onFileUpload(event)">
+      <label>Referensi Guru (TXT, DOCX, PDF, opsional)</label>
+      <input type="file" id="refFile" accept=".txt,.doc,.docx,.pdf" style="padding:6px 10px;font-size:11px" onchange="onFileUpload(event)">
       <div id="fileInfo" style="font-size:11px;color:var(--green);margin-top:4px;display:none"></div>
     </div>
   </div>
@@ -471,6 +471,35 @@ table.kisi tr:hover td{background:var(--coral-pale)}
         <div class="pill" data-val="sangat_tinggi">Sangat Tinggi</div>
       </div>
     </div>
+
+    <div class="form-group">
+      <label>Model Kualitas Soal</label>
+      <select id="kualitasSoal">
+        <option value="standar">Standar</option>
+        <option value="hots">HOTS</option>
+        <option value="literasi_numerasi">HOTS + Literasi Numerasi</option>
+        <option value="solo">HOTS + Taksonomi SOLO</option>
+        <option value="akm_asat" selected>AKM/ASAT Mendalam</option>
+      </select>
+      <div style="font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5">
+        Mode ini mengatur kedalaman stimulus, HOTS, literasi numerasi, dan kualitas pengecoh.
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Level Taksonomi SOLO</label>
+      <div class="pill-group" id="soloLevel">
+        <div class="pill active" data-val="Pre-Struktural">Pre-Struktural</div>
+        <div class="pill active" data-val="Uni-Struktural">Uni-Struktural</div>
+        <div class="pill active" data-val="Multi-Struktural">Multi-Struktural</div>
+        <div class="pill active" data-val="Relational">Relational</div>
+        <div class="pill active" data-val="Extended Abstract">Extended Abstract</div>
+      </div>
+      <div style="font-size:10px;color:var(--gray);margin-top:4px;line-height:1.5">
+        Untuk mode SOLO/AKM, sistem akan mendistribusikan level SOLO secara bertahap.
+      </div>
+    </div>
+
     <div class="form-group">
       <label>Jumlah Soal: <span class="range-current" id="jumlahLabel">10</span></label>
       <div class="range-wrap">
@@ -498,7 +527,7 @@ table.kisi tr:hover td{background:var(--coral-pale)}
       <div class="empty-state">
         <div class="empty-icon">AI</div>
         <h3>Siap Membuat Soal Berkualitas?</h3>
-        <p>Pilih mode generator, isi identitas ujian, pilih mata pelajaran, lalu klik <strong>Generate Soal</strong>. Jika API key kosong, sistem memakai Mode Offline Template.</p>
+        <p>Pilih mode generator, isi identitas ujian, pilih mata pelajaran, lalu klik <strong>Generate Soal</strong>. Jika API key kosong, sistem memakai Mode Offline Template. Untuk hasil lebih mendalam, gunakan mode AKM/ASAT Mendalam dan unggah referensi guru.</p>
       </div>
     </div>
     <div class="tab-panel" id="panel-kunci"></div>
@@ -599,49 +628,39 @@ function getEffectiveProvider() {
 }
 
 function onProviderChange() {
-  const provider = getProviderMode();
+  const provider = getProvider();
+  sessionStorage.setItem('buatsoal_provider', provider);
   const keyInput = document.getElementById('apiKey');
-  if (provider === 'server') keyInput.placeholder = 'Tidak perlu API key guru - memakai server';
-  else if (provider === 'gemini') keyInput.placeholder = 'Masukkan Gemini API Key pribadi: AIza...';
-  else if (provider === 'claude') keyInput.placeholder = 'Masukkan Claude API Key pribadi: sk-ant-...';
-  else if (provider === 'offline') keyInput.placeholder = 'Mode offline tidak memakai API key';
-  else keyInput.placeholder = 'Auto: isi key pribadi atau kosongkan untuk offline';
+  if (!keyInput) return;
+  if (provider === 'gemini') keyInput.placeholder = 'Masukkan Gemini API Key: AIza...';
+  else if (provider === 'claude') keyInput.placeholder = 'Masukkan Claude API Key: sk-ant-...';
+  else if (provider === 'offline') keyInput.placeholder = 'Tidak perlu API key';
+  else keyInput.placeholder = 'Opsional: AIza... / sk-ant-...';
   checkApiKey();
 }
 
 function checkApiKey() {
   const val = document.getElementById('apiKey').value.trim();
   const st = document.getElementById('apiKeyStatus');
-  const provider = getProviderMode();
+  const provider = getProvider();
 
-  if (provider === 'server') {
-    st.textContent = 'Mode Server Gemini aktif. Guru tidak perlu API key.';
+  if (!val || provider === 'offline') {
+    st.textContent = 'Mode Offline Template aktif jika API key kosong.';
     st.className = 'apikey-status ok';
-    return;
-  }
-
-  if (provider === 'offline') {
-    st.textContent = 'Mode Offline aktif. Soal dibuat dari template lokal.';
-    st.className = 'apikey-status ok';
-    return;
-  }
-
-  if (!val) {
-    st.textContent = provider === 'auto' ? 'API key kosong. Auto Hybrid akan memakai Offline Template.' : '';
-    st.className = provider === 'auto' ? 'apikey-status ok' : 'apikey-status';
-    sessionStorage.removeItem('buatsoal_apikey');
+    if (!val) sessionStorage.removeItem('buatsoal_apikey');
     return;
   }
 
   sessionStorage.setItem('buatsoal_apikey', val);
+
   if (val.startsWith('sk-ant-')) {
-    st.textContent = 'Claude API terdeteksi - disimpan hanya di sesi browser.';
+    st.textContent = 'Claude API terdeteksi - disimpan di sesi browser.';
     st.className = 'apikey-status ok';
   } else if (val.startsWith('AIza') || provider === 'gemini') {
-    st.textContent = 'Gemini API terdeteksi - disimpan hanya di sesi browser.';
+    st.textContent = 'Gemini API terdeteksi - disimpan di sesi browser.';
     st.className = 'apikey-status ok';
   } else {
-    st.textContent = 'Format API key belum dikenali. Mode Auto bisa tetap fallback ke Offline.';
+    st.textContent = 'Format belum dikenali. Auto Hybrid akan memakai Offline Template jika gagal.';
     st.className = 'apikey-status err';
   }
 }
@@ -658,7 +677,7 @@ function getApiKey() {
 // ================================================================
 // PILL INTERACTIONS
 // ================================================================
-['bentukSoal','levelKognitif','kesulitan','visualOpt'].forEach(id => {
+['bentukSoal','levelKognitif','kesulitan','visualOpt','soloLevel'].forEach(id => {
   document.querySelectorAll(`#${id} .pill`).forEach(p => {
     p.addEventListener('click', () => p.classList.toggle('active'));
   });
@@ -775,23 +794,49 @@ function onAsesmenChange() {
   const info = document.getElementById('asesmenInfo');
   const title = document.getElementById('asesmenInfoTitle');
   const text = document.getElementById('asesmenInfoText');
-  const asesmanMadrasah = {
+
+  const asesmenMap = {
+    'Formatif': {
+      t: 'Formatif',
+      d: 'Digunakan untuk memantau proses belajar, memberi umpan balik, dan memperbaiki pembelajaran.'
+    },
+    'Sumatif Harian': {
+      t: 'Sumatif Harian',
+      d: 'Digunakan untuk mengukur pencapaian siswa setelah menyelesaikan satu materi atau tujuan pembelajaran.'
+    },
+    'Sumatif Tengah Semester': {
+      t: 'Sumatif Tengah Semester',
+      d: 'Digunakan untuk mengevaluasi capaian pembelajaran pada pertengahan semester.'
+    },
+    'Sumatif Akhir Semester': {
+      t: 'Sumatif Akhir Semester',
+      d: 'Digunakan untuk mengevaluasi capaian pembelajaran pada akhir semester.'
+    },
+    'ASAN': {
+      t: 'ASAN - Asesmen Sumatif Tengah Semester',
+      d: 'Digunakan sebagai asesmen tengah semester dengan cakupan materi separuh semester.'
+    },
     'ASAT': {
       t: 'ASAT - Asesmen Sumatif Akhir Tahun',
-      d: 'Standar Kemenag RI. Soal mencakup seluruh materi satu tahun ajaran. Level: C1-C4 dominan. Digunakan untuk kenaikan kelas madrasah (MI/MTs/MA).'
+      d: 'Digunakan sebagai asesmen akhir tahun dengan cakupan materi satu tahun ajaran.'
     },
     'ASAJ': {
       t: 'ASAJ - Asesmen Sumatif Akhir Jenjang',
-      d: 'Setara Ujian Akhir Madrasah. Soal komprehensif 3 tahun jenjang, tingkat kesulitan lebih tinggi. Digunakan untuk kelulusan MI/MTs/MA.'
+      d: 'Digunakan sebagai asesmen akhir jenjang dengan cakupan materi lebih komprehensif.'
     },
-    'ASAN': {
-      t: 'ASAN - Asesmen Sumatif Akhir Nishfu',
-      d: 'Penilaian Tengah Semester madrasah. Materi separuh semester, level C1-C3 dominan.'
+    'Remedial': {
+      t: 'Remedial',
+      d: 'Digunakan untuk membantu siswa yang belum mencapai tujuan pembelajaran.'
+    },
+    'Pengayaan': {
+      t: 'Pengayaan',
+      d: 'Digunakan untuk memperluas dan memperdalam pemahaman siswa yang sudah mencapai tujuan pembelajaran.'
     }
   };
-  if (asesmanMadrasah[v]) {
-    title.textContent = asesmanMadrasah[v].t;
-    text.textContent = asesmanMadrasah[v].d;
+
+  if (asesmenMap[v]) {
+    title.textContent = asesmenMap[v].t;
+    text.textContent = asesmenMap[v].d;
     info.style.display = 'block';
   } else {
     info.style.display = 'none';
@@ -1047,12 +1092,126 @@ TEKNIK TAMBAHAN (Tinggi):
   return base;
 }
 
+
+// ================================================================
+// PROMPT ENGINE - HOTS, LITERASI NUMERASI, TAKSONOMI SOLO, AKM/ASAT
+// ================================================================
+function getPromptEngineInstr(m, levelArr, kualitasSoal, soloArr) {
+  const mode = kualitasSoal || 'standar';
+  const solo = (soloArr && soloArr.length ? soloArr : [
+    'Pre-Struktural',
+    'Uni-Struktural',
+    'Multi-Struktural',
+    'Relational',
+    'Extended Abstract'
+  ]).join(', ');
+
+  if (mode === 'standar') {
+    return `
+MODE KUALITAS: STANDAR
+- Soal tetap harus sesuai materi, indikator, level kognitif, dan kelas.
+- Gunakan bahasa yang jelas, baku, dan sesuai perkembangan siswa.
+`;
+  }
+
+  if (mode === 'hots') {
+    return `
+MODE KUALITAS: HOTS
+- Dilarang membuat soal hafalan definisi langsung seperti "Apa yang dimaksud..."
+- Soal harus berbasis masalah, kasus, data, situasi nyata, atau pengambilan keputusan.
+- Pertanyaan harus menuntut analisis, penalaran, perbandingan, evaluasi, atau solusi.
+- Minimal 70% soal harus berada pada C4-C6 jika level tersebut dipilih guru.
+`;
+  }
+
+  if (mode === 'literasi_numerasi') {
+    return `
+MODE KUALITAS: HOTS + LITERASI NUMERASI
+- Setiap soal mengukur kemampuan memahami informasi, menafsirkan data, dan mengambil keputusan.
+- Stimulus wajib berupa narasi, berita pendek, studi kasus, tabel, data sederhana, percakapan, atau infografis tekstual.
+- Jika relevan, sisipkan unsur numerasi: angka, perbandingan, persentase, grafik, tabel, urutan, pola, atau data pengamatan.
+- Dilarang membuat soal yang hanya menanyakan definisi.
+- Soal harus dekat dengan kehidupan siswa ${m.kelas}.
+`;
+  }
+
+  if (mode === 'solo') {
+    return `
+MODE KUALITAS: HOTS + TAKSONOMI SOLO
+Gunakan 5 level Taksonomi SOLO berikut secara seimbang:
+${solo}
+
+Makna level:
+1. Pre-Struktural: siswa mengenali informasi awal, tetapi belum membangun hubungan konsep.
+2. Uni-Struktural: siswa fokus pada satu aspek penting dari masalah.
+3. Multi-Struktural: siswa mengidentifikasi beberapa aspek relevan tetapi belum menghubungkannya secara utuh.
+4. Relational: siswa menghubungkan beberapa aspek menjadi pemahaman terpadu.
+5. Extended Abstract: siswa membuat generalisasi, prediksi, evaluasi, atau solusi baru dari konsep.
+
+Aturan:
+- Cantumkan level SOLO pada setiap soal di field "materi" atau "indikator" jika memungkinkan.
+- Distribusikan level SOLO secara bertahap dari mudah ke mendalam.
+- Jangan hanya mengganti kata kerja; kedalaman berpikir harus benar-benar berbeda.
+`;
+  }
+
+  if (mode === 'akm_asat') {
+    return `
+MODE KUALITAS: AKM/ASAT MENDALAM
+Bertindaklah sebagai pembuat soal standar AKM/ASAT dan pakar evaluasi pembelajaran yang menguasai:
+- HOTS
+- Literasi dan numerasi
+- Taksonomi SOLO
+- Evaluasi pembelajaran mendalam
+- Penyusunan stimulus berbasis konteks nyata
+
+Setiap soal WAJIB:
+1. Diawali stimulus berkualitas berupa narasi, berita, studi kasus, percakapan, tabel, data, atau infografis tekstual.
+2. Stimulus ideal 80-150 kata untuk soal literasi/kasus, disesuaikan agar tidak terlalu panjang.
+3. Stimulus harus berbeda untuk setiap soal.
+4. Menggunakan isu/konteks yang dekat dengan kehidupan siswa ${m.kelas}.
+5. Mengukur salah satu atau gabungan kemampuan literasi, numerasi, analisis, evaluasi, atau pemecahan masalah.
+6. Menghindari soal definisi langsung.
+7. Memiliki opsi jawaban homogen, logis, dan tidak mudah ditebak.
+8. Menggunakan pengecoh berdasarkan miskonsepsi umum siswa.
+9. Menghasilkan pembahasan yang menjelaskan alasan jawaban benar dan alasan pengecoh kurang tepat.
+10. Mengacu pada tujuan pembelajaran, materi, dan referensi guru jika tersedia.
+
+Taksonomi SOLO yang digunakan:
+${solo}
+
+Distribusi SOLO:
+- Jika jumlah soal 5, buat masing-masing 1 soal untuk tiap level SOLO.
+- Jika jumlah soal lebih dari 5, ulangi pola SOLO dan tingkatkan kompleksitas stimulus.
+- Level Relational dan Extended Abstract harus berbasis kasus nyata, bukan hafalan.
+`;
+  }
+
+  return '';
+}
+
+function validateHOTSQualityText(text='') {
+  const low = String(text).toLowerCase();
+  const shallow = [
+    'apa yang dimaksud',
+    'sebutkan',
+    'siapa',
+    'kapan',
+    'definisi',
+    'pengertian dari'
+  ];
+  return !shallow.some(k => low.includes(k));
+}
+
 function buildPrompt(batchSoal, startNo, m, levelArr, kesulitanArr, visualArr, jumlahOpsi, useStim, refText, pengecohLevel) {
   const n = batchSoal.length;
   const bentukList = batchSoal.map((b,i) => `Soal ${startNo+i}: ${b}`).join(', ');
   const isMadrasah = ['ASAT','ASAJ','ASAN'].includes(m.jenisAsesmen);
   const isASAJ = m.jenisAsesmen === 'ASAJ';
   const isASAT = m.jenisAsesmen === 'ASAT';
+  const kualitasSoal = getV('kualitasSoal') || 'standar';
+  const soloArr = getAV('soloLevel');
+  const promptEngineInstr = getPromptEngineInstr(m, levelArr, kualitasSoal, soloArr);
 
   const visualInstr = visualArr.length ?
     `1-2 soal WAJIB punya visual. Format "visual_type" + "visual_data":
@@ -1093,6 +1252,8 @@ ${refSec}
 
 ${pengecohInstr}
 
+${promptEngineInstr}
+
 STRUKTUR SOAL WAJIB:
 - Pertanyaan harus jelas, tidak ambigu, bahasa baku
 - Setiap soal WAJIB ada pembahasan singkat tapi jelas (1-3 kalimat) yang menjelaskan MENGAPA jawaban itu benar
@@ -1126,7 +1287,7 @@ FORMAT JSON:
   "level": "C2",
   "kesulitan": "Sedang",
   "materi": "...",
-  "indikator": "Disajikan ..."
+  "indikator": "Disajikan ... | Level SOLO: ..."
 }]}`;
 }
 
@@ -1167,19 +1328,6 @@ function parseAIResponse(raw) {
 // HYBRID AI CALLER + OFFLINE TEMPLATE
 // ================================================================
 async function callAIJSON(prompt, apiKey, provider) {
-  if (provider === 'server') {
-    const res = await fetch('/api/generate', {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ prompt })
-    });
-    const data = await res.json().catch(() => ({}));
-    if (!res.ok) {
-      throw new Error(data.error || 'Server Gemini belum siap. Coba mode Offline Template.');
-    }
-    return parseAIResponse(data.text || '');
-  }
-
   if (provider === 'gemini') {
     const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite-preview:generateContent?key=${encodeURIComponent(apiKey)}`, {
       method: 'POST',
@@ -1341,8 +1489,6 @@ async function doGenerate() {
   const apiKey = getApiKey();
   let provider = getEffectiveProvider();
   if ((provider === 'gemini' || provider === 'claude') && !apiKey) provider = 'offline';
-  if (provider === 'auto' && !apiKey) provider = 'offline';
-  if (provider === 'auto' && apiKey) provider = detectProviderFromKey(apiKey);
 
   const mapel = getMapel();
   const topik = getV('topik');
@@ -1760,5 +1906,5 @@ function doCopy() {
   navigator.clipboard.writeText(t).then(() => alert('Teks soal berhasil disalin ke clipboard!')).catch(()=>alert('Gagal menyalin. Coba lagi.'));
 }
 </script>
-</body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script></body>
 </html>
